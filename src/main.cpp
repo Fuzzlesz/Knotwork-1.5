@@ -63,7 +63,7 @@ namespace QuestPatching {
                         }
 
                         std::uint8_t raw = ini.GetLongValue(name, id.pItem);
-                        quest->data.questType = raw;
+                        quest->data.questType = static_cast<RE::QUEST_DATA::Type>(raw); // Type casting to resolve compile error
                         _loggerInfo("    >Setting {} to {}", quest->fullName, raw);
                     }
                     _loggerInfo(" ");
@@ -82,7 +82,7 @@ namespace QuestPatching {
             }
             return true;
         }
-        catch (std::exception e) {
+        catch (std::exception& e) { // Catching exception by reference
             _loggerError("Failed to perform a necessary check. Error code: {}", e.what());
             return false;
         }
@@ -104,16 +104,28 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_message) {
     }
 }
 
-extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
-    SKSE::PluginVersionData v;
-    v.PluginVersion({ Version::MAJOR, Version::MINOR, Version::PATCH });
-    v.PluginName(Version::NAME);
-    v.AuthorName(Version::PROJECT_AUTHOR);
-    v.UsesAddressLibrary();
-    v.UsesUpdatedStructs();
-    v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
-    return v;
-    }();
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+{
+    a_info->infoVersion = Version::MAJOR, Version::MINOR, Version::PATCH;
+    a_info->name = "ContainerDistributionFramework";
+    a_info->version = Version::MAJOR;
+
+    if (a_skse->IsEditor()) {
+        _loggerError("WRONG VERSION OF THE GAME");
+        return false;
+    }
+
+    const auto ver = a_skse->RuntimeVersion();
+    if (ver
+
+        < SKSE::RUNTIME_1_5_39
+        ) {
+        _loggerError("WRONG VERSION OF THE GAME");
+        return false;
+    }
+
+    return true;
+}
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) {
     SetupLog();
