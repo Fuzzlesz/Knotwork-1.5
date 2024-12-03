@@ -76,10 +76,11 @@ namespace QuestPatching {
             const auto& questArray = dataHandler->GetFormArray<RE::TESQuest>();
 
             for (auto* quest : questArray) {
-                if (quest->data.questType == 0) {
-                    quest->data.questType = 8;
+                if (quest->data.questType == RE::QUEST_DATA::Type::kNone) {
+                    quest->data.questType = RE::QUEST_DATA::Type::kSideQuest;
+                    //_loggerInfo(" >Patched {} from NONE to SideQuest", quest->formEditorID);
                 }
-            }
+                }
             return true;
         }
         catch (std::exception& e) { // Catching exception by reference
